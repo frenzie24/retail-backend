@@ -13,7 +13,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   res.status(200).json({msg: 'hi dickbutt'});
   // find a single product by its `id`
-  //const product = await 
+  const product = await Product.findByPk(req.params.id, {
+    
+  })
   // be sure to include its associated Category and Tag data
 });
 
