@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
   // find all tags
   // be sure to include its associated Product data
   try {
-    log(`Getting all products:`, 'blue');
+    log(`Getting all tags:`, 'blue');
     const tags = await Tag.findAll({ include: [{ model: Product, through: ProductTag }] });
     if (!tags) {
       warn('We had an issue getting products.');
@@ -21,13 +21,44 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
+  try {
+    log(`Getting all tags:`, 'blue');
+    /* 
+    find a single product by its `id`  and joins with category and Tag, 
+    Category model and Product model share a foreign key
+    Product relates to Tag through ProductTag (product_id, and tag_id)
+    */
+    const tags = await Tag.findByPk(req.params.id, { include: [{ model: Product, through: ProductTag }] });
+    if (!tags) {
+      warn('We had an issue getting tags.');
+      res.status(404).json({ msg: 'there was an issue getting all tags' });
+    }
+    res.status(200).json(tags);
+  } catch (e) {
+    // if we have an error, have logger print a formatted error;
+    error(e);
+    res.status(500), json(e);
+  }
 });
 
 router.post('/', (req, res) => {
   // create a new tag
+  log(['req.body:', req.body]);
+
+  Tag.create(req.body)
+    .then((tag) => {
+      
+      // if no product tags, just respond
+      res.status(200).json(tag);
+    })
+    .then((productTagIds) => res.status(200).json(productTagIds))
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json(err);
+    });
 });
 
 router.put('/:id', (req, res) => {
