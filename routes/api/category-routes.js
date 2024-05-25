@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) => {
   } catch (e) {
     // if we have an error, have logger print a formatted error;
     error(e);
-    res.status(500), json(e);
+    res.status(500).json(e);
   }
 
   // be sure to include its associated Products
@@ -48,13 +48,43 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', (req, res) => {
   // create a new category
+  log(['req.body:', req.body]);
+
+  Category.create(req.body)
+    .then((product) => {
+      // if there's product tags, we need to create pairings to bulk create in the ProductTag model
+      
+      // if no product tags, just respond
+      res.status(200).json(product);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(400).json(err);
+    });
 });
 
 router.put('/:id', (req, res) => {
   // update a category by its `id` value
+  log('trying to update a category', 'red')
+  Category.update(req.body, {
+    where: {
+      id: req.params.id,
+    },
+  })
+    .then((category) => {
+     
+      log('it worked', 'green')
+      return res.json(category);
+    })
+    .catch((err) => {
+      // console.log(err);
+      res.status(400).json(err);
+    });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
+  await Category.destroy({where: {id: req.params.id}});
+  res.status(200).json({msg:' category deleted'})
   // delete a category by its `id` value
 });
 

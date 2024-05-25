@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
   } catch (e) {
     // if we have an error, have logger print a formatted error;
     error(e);
-    res.status(500), json(e);
+    res.status(500).json(e);
   }
 });
 
@@ -133,7 +133,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
  await Product.destroy({where: {id: req.params.id}});
- 
+ res.status(200).json({msg:' Product deleted'})
   // delete one product by its `id` value
 });
 
