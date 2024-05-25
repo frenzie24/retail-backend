@@ -22,8 +22,27 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find one category by its `id` value
+  try {
+    log(`Getting all categories:`, 'blue');
+    /* 
+    find a single product by its `id`  and joins with category and Tag, 
+    Category model and Product model share a foreign key
+    Product relates to Tag through ProductTag (product_id, and tag_id)
+    */
+    const category = await Category.findByPk(req.params.id, { include: [{ model: Product }] });
+    if (!category) {
+      warn(`there was an issue getting categories id#: ${req.params.id}`);
+      res.status(404).json({ msg: `there was an issue getting categories id#: ${req.params.id}` });
+    }
+    res.status(200).json(category);
+  } catch (e) {
+    // if we have an error, have logger print a formatted error;
+    error(e);
+    res.status(500), json(e);
+  }
+
   // be sure to include its associated Products
 });
 
