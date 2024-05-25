@@ -63,9 +63,27 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
+   // update a category by its `id` value
+   log('trying to update a category', 'red')
+   Tag.update(req.body, {
+     where: {
+       id: req.params.id,
+     },
+   })
+     .then((tag) => {
+      
+       log('it worked', 'green')
+       return res.json(tag);
+     })
+     .catch((err) => {
+       // console.log(err);
+       res.status(400).json(err);
+     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
+  await Tag.destroy({where: {id: req.params.id}});
+  res.status(200).json({msg:' tag deleted'})
   // delete on tag by its `id` value
 });
 
