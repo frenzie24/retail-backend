@@ -1,12 +1,12 @@
 const router = require('express').Router();
 const { Category, Product } = require('../../models');
-const {log, error} = require('@frenzie24/logger');
+const {log, error, warn, info} = require('@frenzie24/logger');
 // The `/api/categories` endpoint
 
 router.get('/', async (req, res) => {
   // find all categories
   // be sure to include its associated Products
-  
+
   try {
     log(`Getting all products:`, 'blue');
     const categories = await Category.findAll({ include: [{ model: Product }]});//, { model: Tag, through: ProductTag }] });
@@ -25,22 +25,22 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   // find one category by its `id` value
   try {
-    log(`Getting all categories:`, 'blue');
-    /* 
-    find a single product by its `id`  and joins with category and Tag, 
+    log(`Getting categories by id: ${req.params.id}`, 'blue');
+    /*
+    find a single product by its `id`  and joins with category and Tag,
     Category model and Product model share a foreign key
     Product relates to Tag through ProductTag (product_id, and tag_id)
     */
     const category = await Category.findByPk(req.params.id, { include: [{ model: Product }] });
     if (!category) {
       warn(`there was an issue getting categories id#: ${req.params.id}`);
-      res.status(404).json({ msg: `there was an issue getting categories id#: ${req.params.id}` });
+      return res.status(404).json({ msg: `there was an issue getting categories id#: ${req.params.id}` });
     }
-    res.status(200).json(category);
+    return res.status(200).json(category);
   } catch (e) {
     // if we have an error, have logger print a formatted error;
     error(e);
-    res.status(500).json(e);
+    return res.status(500).json(e);
   }
 
   // be sure to include its associated Products
@@ -53,7 +53,7 @@ router.post('/', (req, res) => {
   Category.create(req.body)
     .then((product) => {
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
-      
+
       // if no product tags, just respond
       res.status(200).json(product);
     })
@@ -72,7 +72,7 @@ router.put('/:id', (req, res) => {
     },
   })
     .then((category) => {
-     
+
       log('it worked', 'green')
       return res.json(category);
     })
@@ -83,6 +83,7 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
+  debugger;
   await Category.destroy({where: {id: req.params.id}});
   res.status(200).json({msg:' category deleted'})
   // delete a category by its `id` value
